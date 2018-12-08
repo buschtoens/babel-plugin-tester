@@ -21,7 +21,7 @@ const fullDefaultConfig = {
 
 function pluginTester({
   /* istanbul ignore next (TODO: write a test for this) */
-  babel = require('babel-core'),
+  babel,
   plugin = requiredParam('plugin'),
   pluginName = getPluginName(plugin, babel),
   title: describeBlockTitle = pluginName,
@@ -32,6 +32,14 @@ function pluginTester({
   filename,
   ...rest
 } = {}) {
+  if (!babel) {
+    try {
+      babel = require('@babel/core');
+    } catch (error) {
+      babel = require('babel-core');
+    }
+  }
+
   let testNumber = 1
   if (fixtures) {
     testFixtures({

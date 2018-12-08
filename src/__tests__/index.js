@@ -1,7 +1,7 @@
 import fs from 'fs'
 import path from 'path'
 import assert from 'assert'
-import * as babel from 'babel-core'
+import * as babel from '@babel/core'
 // eslint-disable-next-line import/default
 import pluginTester from '../'
 import identifierReversePlugin from './helpers/identifier-reverse-plugin'
@@ -30,7 +30,7 @@ beforeEach(() => {
   global.it.skip = jest.fn(titleTesterMock)
   itOnlySpy = global.it.only
   itSkipSpy = global.it.skip
-  transformSpy = jest.spyOn(babel, 'transform')
+  transformSpy = jest.spyOn(babel, 'transform', 'get')
   writeFileSyncSpy = jest
     .spyOn(fs, 'writeFileSync')
     .mockImplementation(() => {})
@@ -49,6 +49,17 @@ afterEach(() => {
 test('plugin is required', () => {
   expect(() => pluginTester()).toThrowErrorMatchingSnapshot()
 })
+
+test.skip('logs when @babel/core isnt found', () => {
+  jest.mock('@babel/core')
+  const {plugin} = getOptions()
+  pluginTester({plugin})
+
+  expect(errorSpy).toHaveBeenCalledTimes(1)
+  expect(errorSpy).toHaveBeenCalledWith(
+    expect.stringMatching(/deprecated/),
+  )
+});
 
 test('logs when plugin name is not inferable and rethrows errors', () => {
   const error = new Error('hey there')
@@ -297,7 +308,7 @@ test('creates output file for new tests', async () => {
   ])
 })
 
-test('uses the fixture filename in babelOptions', async () => {
+test.only('uses the fixture filename in babelOptions', async () => {
   const fixture = getFixturePath('fixture1.js')
   const tests = [
     {
